@@ -51,8 +51,6 @@ body { font-family: -apple-system, 'Hiragino Sans', sans-serif; color: #111827; 
 .reset-btn { width: 100%; padding: 8px; margin-top: 6px; border: 1px solid #E5E7EB; border-radius: 10px; background: transparent; color: #9CA3AF; font-size: 13px; cursor: pointer; font-family: inherit; }
 .relative { position: relative; }
 .hidden { display: none !important; }
-
-/* 同意書セクション */
 .consent-box { background: #fff; border: 1px solid #E5E7EB; border-radius: 12px; padding: 16px; margin-bottom: 20px; }
 .consent-question { font-size: 15px; font-weight: 600; color: #111827; margin-bottom: 14px; }
 .consent-btns { display: flex; gap: 10px; }
@@ -67,7 +65,6 @@ body { font-family: -apple-system, 'Hiragino Sans', sans-serif; color: #111827; 
   <div class="header-label">カルテ入力</div>
   <div class="header-title">施術内容ジェネレーター</div>
 
-  <!-- 同意書確認 -->
   <div class="consent-box">
     <div class="consent-question">同意書にサインをもらいましたか？</div>
     <div class="consent-btns">
@@ -79,7 +76,6 @@ body { font-family: -apple-system, 'Hiragino Sans', sans-serif; color: #111827; 
     </div>
   </div>
 
-  <!-- メニュー -->
   <div class="section">
     <div class="section-head">メニュー <span id="badge-menu" class="badge badge-required">必須</span></div>
     <div class="relative">
@@ -92,6 +88,7 @@ body { font-family: -apple-system, 'Hiragino Sans', sans-serif; color: #111827; 
   </div>
 
   <div id="form-area" class="hidden">
+    <!-- 主訴 -->
     <div class="section">
       <div class="section-head">主訴 <span id="badge-shuso" class="badge badge-required">必須</span></div>
       <div class="sub-label">部位</div>
@@ -100,23 +97,19 @@ body { font-family: -apple-system, 'Hiragino Sans', sans-serif; color: #111827; 
       <div class="chips" id="chips-shuso-symptoms"></div>
       <input type="text" class="free-input" id="shuso-free" placeholder="その他（自由入力）" oninput="onInput()">
     </div>
-    <div class="section hidden" id="section-aroma">
-      <div class="section-head">アロマ <span id="badge-aroma" class="badge badge-required">必須</span></div>
-      <div class="sub-label">通常</div>
-      <div class="chips" id="chips-aroma-normal"></div>
-      <div class="sub-label">限定</div>
-      <div class="chips" id="chips-aroma-limited"></div>
-    </div>
+    <!-- オプション -->
     <div class="section hidden" id="section-option">
       <div class="section-head">オプション <span id="badge-option" class="badge badge-required">必須</span> <span id="badge-option-count" class="badge badge-info"></span></div>
       <div class="chips" id="chips-option"></div>
       <div class="limit-note hidden" id="option-limit"></div>
     </div>
+    <!-- 機械部位 -->
     <div class="section hidden" id="section-machine">
       <div class="section-head">機械部位 <span id="badge-machine" class="badge badge-required">必須</span> <span id="badge-machine-count" class="badge badge-info"></span></div>
       <div class="chips" id="chips-machine"></div>
       <div class="limit-note hidden" id="machine-limit"></div>
     </div>
+    <!-- 圧 -->
     <div class="section">
       <div class="section-head">圧の強さ <span class="badge badge-done">✓</span></div>
       <div class="intensity-row">
@@ -126,6 +119,7 @@ body { font-family: -apple-system, 'Hiragino Sans', sans-serif; color: #111827; 
         <span class="intensity-val" id="intensity-val">普通（3）</span>
       </div>
     </div>
+    <!-- NG -->
     <div class="section">
       <div class="section-head">NG・注意事項 <span id="badge-ng" class="badge badge-required">必須</span></div>
       <div class="sub-label">部位</div>
@@ -136,6 +130,15 @@ body { font-family: -apple-system, 'Hiragino Sans', sans-serif; color: #111827; 
         <input type="text" class="free-input" id="ng-free" placeholder="その他NG・備考（自由入力）" oninput="onInput()">
       </div>
     </div>
+    <!-- アロマ（NG・注意事項の下に移動） -->
+    <div class="section hidden" id="section-aroma">
+      <div class="section-head">アロマ <span id="badge-aroma" class="badge badge-required">必須</span></div>
+      <div class="sub-label">通常</div>
+      <div class="chips" id="chips-aroma-normal"></div>
+      <div class="sub-label">限定</div>
+      <div class="chips" id="chips-aroma-limited"></div>
+    </div>
+    <!-- 出力 -->
     <div class="section-head" style="margin-top:20px;margin-bottom:8px;">カルテ記載文</div>
     <div class="output-box" id="output">選択するとここに文章が生成されます</div>
     <button class="copy-btn locked" id="copy-btn" onclick="doCopy()">未入力の項目があります</button>
@@ -180,63 +183,24 @@ const AROMA_LIMITED=["限定1","限定2","限定3"];
 const NG_PARTS=["なし","脇腹","足裏","太もも表面","太もも背面","腰","お尻","指","腕","頬","目の周り"];
 const NG_REASONS=["ケガ","苦手"];
 const ILABELS=["","弱め","やや弱め","普通","やや強め","強め"];
-
-let consentOk = false;
+let consentOk=false;
 let S={menuId:null,shusoParts:[],shusoSymptoms:[],aroma:null,options:[],machineParts:[],ngParts:[],ngReasons:[],intensity:3};
-
-function setConsent(val) {
-  consentOk = val;
-  const yesBtn = document.getElementById('consent-yes');
-  const noBtn  = document.getElementById('consent-no');
-  const warn   = document.getElementById('consent-warning');
-  const menuBtn = document.getElementById('menu-btn');
-  if (val) {
-    yesBtn.className = 'consent-btn yes';
-    noBtn.className  = 'consent-btn';
-    warn.classList.add('hidden');
-    menuBtn.className = S.menuId ? 'select-btn active' : 'select-btn';
-  } else {
-    yesBtn.className = 'consent-btn';
-    noBtn.className  = 'consent-btn no';
-    warn.classList.remove('hidden');
-    menuBtn.className = 'select-btn locked-btn';
-    // メニューが開いていれば閉じる
-    document.getElementById('menu-dropdown').classList.add('hidden');
-    document.getElementById('menu-arrow').textContent = '▼';
-  }
-}
-
-function tryOpenMenu() {
-  if (!consentOk) return;
-  toggleDropdown();
-}
-
+function setConsent(val){consentOk=val;const yb=document.getElementById('consent-yes');const nb=document.getElementById('consent-no');const w=document.getElementById('consent-warning');const mb=document.getElementById('menu-btn');if(val){yb.className='consent-btn yes';nb.className='consent-btn';w.classList.add('hidden');mb.className=S.menuId?'select-btn active':'select-btn';}else{yb.className='consent-btn';nb.className='consent-btn no';w.classList.remove('hidden');mb.className='select-btn locked-btn';document.getElementById('menu-dropdown').classList.add('hidden');document.getElementById('menu-arrow').textContent='▼';}}
+function tryOpenMenu(){if(!consentOk)return;toggleDropdown();}
 function getMenu(){return MENUS.find(m=>m.id===S.menuId)||null;}
 function toggleDropdown(){const dd=document.getElementById('menu-dropdown');const open=!dd.classList.contains('hidden');if(open){dd.classList.add('hidden');document.getElementById('menu-arrow').textContent='▼';}else{buildDD();dd.classList.remove('hidden');document.getElementById('menu-arrow').textContent='▲';}}
 function buildDD(){const dd=document.getElementById('menu-dropdown');dd.innerHTML='';MENUS.forEach(m=>{const b=document.createElement('button');b.className='dropdown-item'+(m.id===S.menuId?' active':'');let tags='';if(m.aroma)tags+=`<span class="meta-tag meta-aroma">アロマ</span>`;if(m.optionCount)tags+=`<span class="meta-tag meta-option">OP×${m.optionCount}</span>`;if(m.machine)tags+=`<span class="meta-tag meta-machine">機械</span>`;b.innerHTML=`<div class="item-row"><span class="item-no">No.${m.id}</span><span class="item-name">${m.name}</span></div><div class="item-meta"><span style="font-size:11px;color:#6B7280">${m.time}</span><span style="font-size:11px;color:#6B7280">${m.price}</span>${tags}</div>`;b.onclick=()=>selectMenu(m.id);dd.appendChild(b);});}
 function selectMenu(id){S.menuId=id;S.options=[];S.aroma=null;S.machineParts=[];document.getElementById('menu-dropdown').classList.add('hidden');document.getElementById('menu-arrow').textContent='▼';const m=getMenu();document.getElementById('menu-label').textContent=`No.${m.id}　${m.name}`;document.getElementById('menu-btn').className='select-btn active';document.getElementById('form-area').classList.remove('hidden');buildForm();onInput();}
-function buildForm(){const m=getMenu();buildChipSet('chips-shuso-parts',SHUSO_PARTS,()=>S.shusoParts,l=>{toggle(S.shusoParts,l);onInput();});buildChipSet('chips-shuso-symptoms',SHUSO_SYMPTOMS,()=>S.shusoSymptoms,l=>{toggle(S.shusoSymptoms,l);onInput();});document.getElementById('shuso-free').value='';const sa=document.getElementById('section-aroma');if(m.aroma){sa.classList.remove('hidden');buildChipSet('chips-aroma-normal',AROMA_NORMAL,()=>[S.aroma],l=>{S.aroma=S.aroma===l?null:l;onInput();});buildChipSet('chips-aroma-limited',AROMA_LIMITED,()=>[S.aroma],l=>{S.aroma=S.aroma===l?null:l;onInput();});}else sa.classList.add('hidden');const so=document.getElementById('section-option');if(m.optionCount>0){so.classList.remove('hidden');document.getElementById('badge-option-count').textContent=`${m.optionCount}つ選択`;buildOptionChips();}else so.classList.add('hidden');buildMachineSection();buildChipSet('chips-ng-parts',NG_PARTS,()=>S.ngParts,l=>{if(l==='なし'){S.ngParts=S.ngParts.includes('なし')?[]:['なし'];S.ngReasons=[];}else{S.ngParts=S.ngParts.includes(l)?S.ngParts.filter(x=>x!==l):[...S.ngParts.filter(x=>x!=='なし'),l];}onInput();});buildChipSet('chips-ng-reasons',NG_REASONS,()=>S.ngReasons,l=>{toggle(S.ngReasons,l);onInput();});document.getElementById('ng-free').value='';}
+function buildForm(){const m=getMenu();buildChipSet('chips-shuso-parts',SHUSO_PARTS,()=>S.shusoParts,l=>{toggle(S.shusoParts,l);onInput();});buildChipSet('chips-shuso-symptoms',SHUSO_SYMPTOMS,()=>S.shusoSymptoms,l=>{toggle(S.shusoSymptoms,l);onInput();});document.getElementById('shuso-free').value='';const so=document.getElementById('section-option');if(m.optionCount>0){so.classList.remove('hidden');document.getElementById('badge-option-count').textContent=`${m.optionCount}つ選択`;buildOptionChips();}else so.classList.add('hidden');buildMachineSection();buildChipSet('chips-ng-parts',NG_PARTS,()=>S.ngParts,l=>{if(l==='なし'){S.ngParts=S.ngParts.includes('なし')?[]:['なし'];S.ngReasons=[];}else{S.ngParts=S.ngParts.includes(l)?S.ngParts.filter(x=>x!==l):[...S.ngParts.filter(x=>x!=='なし'),l];}onInput();});buildChipSet('chips-ng-reasons',NG_REASONS,()=>S.ngReasons,l=>{toggle(S.ngReasons,l);onInput();});document.getElementById('ng-free').value='';const sa=document.getElementById('section-aroma');if(m.aroma){sa.classList.remove('hidden');buildChipSet('chips-aroma-normal',AROMA_NORMAL,()=>[S.aroma],l=>{S.aroma=S.aroma===l?null:l;onInput();});buildChipSet('chips-aroma-limited',AROMA_LIMITED,()=>[S.aroma],l=>{S.aroma=S.aroma===l?null:l;onInput();});}else sa.classList.add('hidden');}
 function toggle(arr,l){const i=arr.indexOf(l);if(i>=0)arr.splice(i,1);else arr.push(l);}
 function buildChipSet(id,items,getSel,onClick){const c=document.getElementById(id);c.innerHTML='';items.forEach(item=>{const b=document.createElement('button');b.className='chip'+(getSel().includes(item)?' selected':'');b.textContent=item;b.onclick=()=>onClick(item);c.appendChild(b);});}
 function buildOptionChips(){const m=getMenu();const c=document.getElementById('chips-option');c.innerHTML='';const maxed=S.options.length>=m.optionCount;m.options.forEach(item=>{const sel=S.options.includes(item);const b=document.createElement('button');b.className='chip'+(sel?' selected':'')+(!sel&&maxed?' disabled':'');b.disabled=!sel&&maxed;b.textContent=item;b.onclick=()=>{if(!sel&&maxed)return;if(sel){S.options=S.options.filter(o=>o!==item);if(m.machine&&m.machine.cond===item)S.machineParts=[];}else S.options.push(item);buildOptionChips();buildMachineSection();onInput();};c.appendChild(b);});const lim=document.getElementById('option-limit');if(maxed){lim.textContent=`✓ ${m.optionCount}つ選択済み`;lim.classList.remove('hidden');}else lim.classList.add('hidden');}
 function buildMachineSection(){const m=getMenu();const sec=document.getElementById('section-machine');if(!m.machine){sec.classList.add('hidden');return;}const show=m.machine.cond?S.options.includes(m.machine.cond):true;if(!show){sec.classList.add('hidden');return;}sec.classList.remove('hidden');const c=document.getElementById('chips-machine');c.innerHTML='';if(m.machine.fixed){document.getElementById('badge-machine-count').textContent='固定';m.machine.parts.forEach(p=>{const s=document.createElement('span');s.className='chip-fixed';s.textContent=p;c.appendChild(s);});}else{document.getElementById('badge-machine-count').textContent=`${m.machine.count}部位選択`;const maxed=S.machineParts.length>=m.machine.count;m.machine.parts.forEach(p=>{const sel=S.machineParts.includes(p);const b=document.createElement('button');b.className='chip'+(sel?' selected':'')+(!sel&&maxed?' disabled':'');b.disabled=!sel&&maxed;b.textContent=p;b.onclick=()=>{if(!sel&&maxed)return;if(sel)S.machineParts=S.machineParts.filter(x=>x!==p);else S.machineParts.push(p);buildMachineSection();onInput();};c.appendChild(b);});const lim=document.getElementById('machine-limit');if(maxed){lim.textContent=`✓ ${m.machine.count}部位選択済み`;lim.classList.remove('hidden');}else lim.classList.add('hidden');}}
-function onInput(){const m=getMenu();if(!m)return;S.intensity=parseInt(document.getElementById('intensity').value);document.getElementById('intensity-val').textContent=`${ILABELS[S.intensity]}（${S.intensity}）`;const sf=document.getElementById('shuso-free').value.trim();const nf=document.getElementById('ng-free').value.trim();const ngN=S.ngParts.includes('なし');document.getElementById('ng-detail-area').style.display=ngN?'none':'';refreshChips('chips-shuso-parts',SHUSO_PARTS,S.shusoParts,null);refreshChips('chips-shuso-symptoms',SHUSO_SYMPTOMS,S.shusoSymptoms,null);if(m.aroma){refreshChips('chips-aroma-normal',AROMA_NORMAL,[S.aroma],null);refreshChips('chips-aroma-limited',AROMA_LIMITED,[S.aroma],null);}refreshChips('chips-ng-parts',NG_PARTS,S.ngParts,p=>p!=='なし'&&ngN);refreshChips('chips-ng-reasons',NG_REASONS,S.ngReasons,null);const shusoOk=S.shusoParts.length>0||S.shusoSymptoms.length>0||sf!=='';const aromaOk=!m.aroma||S.aroma!==null;const optOk=m.optionCount===0||S.options.length>=m.optionCount;const showM=m.machine&&(m.machine.cond?S.options.includes(m.machine.cond):true);const machOk=!showM||m.machine.fixed||S.machineParts.length>=m.machine.count;const ngOk=S.ngParts.length>0||nf!=='';const ok=shusoOk&&aromaOk&&optOk&&machOk&&ngOk;setBadge('badge-menu',true);setBadge('badge-shuso',shusoOk);if(m.aroma)setBadge('badge-aroma',aromaOk);if(m.optionCount>0)setBadge('badge-option',optOk);if(showM&&!m.machine.fixed)setBadge('badge-machine',machOk);setBadge('badge-ng',ngOk);const lines=[];const si=[];if(S.shusoParts.length)si.push(S.shusoParts.join('・'));if(S.shusoSymptoms.length)si.push(S.shusoSymptoms.join('・'));if(sf)si.push(sf);lines.push(`【主訴】${si.length?si.join('／'):'未入力'}`);if(m.aroma)lines.push(`【アロマ】${S.aroma??'未選択'}`);if(m.optionCount>0)lines.push(`【オプション】${S.options.length?S.options.join('、'):'未選択'}（${m.optionCount}つ選択）`);if(showM){if(m.machine.fixed)lines.push(`【機械部位】${m.machine.parts.join('、')}（固定）`);else lines.push(`【機械部位】${S.machineParts.length?S.machineParts.join('、'):'未選択'}（${m.machine.count}部位）`);}lines.push(`【圧】${ILABELS[S.intensity]}（${S.intensity}/5）`);const ni=[];if(ngN){ni.push('なし');}else{if(S.ngParts.length)ni.push(S.ngParts.join('・'));if(S.ngReasons.length)ni.push(S.ngReasons.join('・'));}if(nf)ni.push(nf);lines.push(`【NG・注意】${ni.length?ni.join('／'):'未入力'}`);document.getElementById('output').textContent=lines.join('\n');const btn=document.getElementById('copy-btn');if(ok){btn.className='copy-btn';btn.textContent='カルテにコピー';btn.disabled=false;}else{btn.className='copy-btn locked';btn.textContent='未入力の項目があります';btn.disabled=true;}}
+function onInput(){const m=getMenu();if(!m)return;S.intensity=parseInt(document.getElementById('intensity').value);document.getElementById('intensity-val').textContent=`${ILABELS[S.intensity]}（${S.intensity}）`;const sf=document.getElementById('shuso-free').value.trim();const nf=document.getElementById('ng-free').value.trim();const ngN=S.ngParts.includes('なし');document.getElementById('ng-detail-area').style.display=ngN?'none':'';refreshChips('chips-shuso-parts',SHUSO_PARTS,S.shusoParts,null);refreshChips('chips-shuso-symptoms',SHUSO_SYMPTOMS,S.shusoSymptoms,null);if(m.aroma){refreshChips('chips-aroma-normal',AROMA_NORMAL,[S.aroma],null);refreshChips('chips-aroma-limited',AROMA_LIMITED,[S.aroma],null);}refreshChips('chips-ng-parts',NG_PARTS,S.ngParts,p=>p!=='なし'&&ngN);refreshChips('chips-ng-reasons',NG_REASONS,S.ngReasons,null);const shusoOk=S.shusoParts.length>0||S.shusoSymptoms.length>0||sf!=='';const aromaOk=!m.aroma||S.aroma!==null;const optOk=m.optionCount===0||S.options.length>=m.optionCount;const showM=m.machine&&(m.machine.cond?S.options.includes(m.machine.cond):true);const machOk=!showM||m.machine.fixed||S.machineParts.length>=m.machine.count;const ngOk=S.ngParts.length>0||nf!=='';const ok=shusoOk&&aromaOk&&optOk&&machOk&&ngOk;setBadge('badge-menu',true);setBadge('badge-shuso',shusoOk);if(m.aroma)setBadge('badge-aroma',aromaOk);if(m.optionCount>0)setBadge('badge-option',optOk);if(showM&&!m.machine.fixed)setBadge('badge-machine',machOk);setBadge('badge-ng',ngOk);const lines=[];const si=[];if(S.shusoParts.length)si.push(S.shusoParts.join('・'));if(S.shusoSymptoms.length)si.push(S.shusoSymptoms.join('・'));if(sf)si.push(sf);lines.push(`【主訴】${si.length?si.join('／'):'未入力'}`);if(m.optionCount>0)lines.push(`【オプション】${S.options.length?S.options.join('、'):'未選択'}（${m.optionCount}つ選択）`);if(showM){if(m.machine.fixed)lines.push(`【機械部位】${m.machine.parts.join('、')}（固定）`);else lines.push(`【機械部位】${S.machineParts.length?S.machineParts.join('、'):'未選択'}（${m.machine.count}部位）`);}lines.push(`【圧】${ILABELS[S.intensity]}（${S.intensity}/5）`);const ni=[];if(ngN){ni.push('なし');}else{if(S.ngParts.length)ni.push(S.ngParts.join('・'));if(S.ngReasons.length)ni.push(S.ngReasons.join('・'));}if(nf)ni.push(nf);lines.push(`【NG・注意】${ni.length?ni.join('／'):'未入力'}`);if(m.aroma)lines.push(`【アロマ】${S.aroma??'未選択'}`);document.getElementById('output').textContent=lines.join('\n');const btn=document.getElementById('copy-btn');if(ok){btn.className='copy-btn';btn.textContent='カルテにコピー';btn.disabled=false;}else{btn.className='copy-btn locked';btn.textContent='未入力の項目があります';btn.disabled=true;}}
 function refreshChips(id,items,sel,disFn){const c=document.getElementById(id);Array.from(c.children).forEach((b,i)=>{const item=items[i];const s=sel.includes(item);const d=disFn?disFn(item):false;b.className='chip'+(s?' selected':'')+(d?' disabled':'');b.disabled=d;});}
 function setBadge(id,filled){const el=document.getElementById(id);if(!el)return;el.className='badge '+(filled?'badge-done':'badge-required');el.textContent=filled?'✓':'必須';}
 function doCopy(){const t=document.getElementById('output').textContent;if(!t||t==='選択するとここに文章が生成されます')return;navigator.clipboard.writeText(t).then(()=>{const b=document.getElementById('copy-btn');b.className='copy-btn done';b.textContent='✓ コピーしました';setTimeout(()=>{b.className='copy-btn';b.textContent='カルテにコピー';},2000);});}
-function doReset(){
-  consentOk=false;
-  S={menuId:null,shusoParts:[],shusoSymptoms:[],aroma:null,options:[],machineParts:[],ngParts:[],ngReasons:[],intensity:3};
-  document.getElementById('consent-yes').className='consent-btn';
-  document.getElementById('consent-no').className='consent-btn';
-  document.getElementById('consent-warning').classList.add('hidden');
-  document.getElementById('menu-label').textContent='メニューを選択してください';
-  document.getElementById('menu-btn').className='select-btn locked-btn';
-  document.getElementById('form-area').classList.add('hidden');
-  document.getElementById('menu-dropdown').classList.add('hidden');
-  document.getElementById('menu-arrow').textContent='▼';
-  setBadge('badge-menu',false);
-}
+function doReset(){consentOk=false;S={menuId:null,shusoParts:[],shusoSymptoms:[],aroma:null,options:[],machineParts:[],ngParts:[],ngReasons:[],intensity:3};document.getElementById('consent-yes').className='consent-btn';document.getElementById('consent-no').className='consent-btn';document.getElementById('consent-warning').classList.add('hidden');document.getElementById('menu-label').textContent='メニューを選択してください';document.getElementById('menu-btn').className='select-btn locked-btn';document.getElementById('form-area').classList.add('hidden');document.getElementById('menu-dropdown').classList.add('hidden');document.getElementById('menu-arrow').textContent='▼';setBadge('badge-menu',false);}
 document.addEventListener('click',e=>{const dd=document.getElementById('menu-dropdown');if(!dd.classList.contains('hidden')&&!document.getElementById('menu-btn').contains(e.target)&&!dd.contains(e.target)){dd.classList.add('hidden');document.getElementById('menu-arrow').textContent='▼';}});
 </script>
 </body>
