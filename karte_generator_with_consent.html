@@ -1,0 +1,243 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body { font-family: -apple-system, 'Hiragino Sans', sans-serif; color: #111827; background: #F8FAFC; }
+#app { max-width: 600px; margin: 0 auto; padding: 16px 14px 40px; }
+.header-label { font-size: 11px; font-weight: 600; color: #9CA3AF; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 4px; }
+.header-title { font-size: 20px; font-weight: 700; color: #111827; margin-bottom: 20px; }
+.section { margin-bottom: 20px; }
+.section-head { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 700; color: #6B7280; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid #E5E7EB; flex-wrap: wrap; }
+.badge { font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 8px; }
+.badge-required { background: #FEE2E2; color: #991B1B; }
+.badge-done { background: #DCFCE7; color: #166534; }
+.badge-info { background: #FEF3C7; color: #92400E; }
+.sub-label { font-size: 11px; font-weight: 700; color: #9CA3AF; margin: 8px 0 6px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 4px; }
+.chip { display: inline-flex; align-items: center; padding: 6px 12px; border-radius: 20px; border: 1px solid #D1D5DB; background: #fff; color: #374151; font-size: 13px; font-weight: 400; cursor: pointer; transition: all 0.12s; -webkit-user-select: none; user-select: none; }
+.chip.selected { border: 1.5px solid #3B82F6; background: #EFF6FF; color: #1D4ED8; font-weight: 600; }
+.chip.disabled { background: #F9FAFB; color: #9CA3AF; border-color: #E5E7EB; cursor: default; }
+.chip-fixed { display: inline-flex; align-items: center; padding: 6px 12px; border-radius: 20px; background: #FEF3C7; color: #92400E; font-size: 13px; font-weight: 600; border: 1px solid #FDE68A; }
+.select-btn { width: 100%; padding: 10px 14px; border: 1px solid #D1D5DB; border-radius: 10px; background: #fff; font-size: 12px; color: #9CA3AF; cursor: pointer; text-align: left; display: flex; justify-content: space-between; align-items: flex-start; font-weight: 400; line-height: 1.5; }
+.select-btn.active { border: 1.5px solid #3B82F6; color: #1D4ED8; font-weight: 600; }
+.select-btn.locked-btn { background: #F9FAFB; color: #9CA3AF; cursor: not-allowed; border-color: #E5E7EB; }
+.dropdown { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: #fff; border: 1px solid #E5E7EB; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); z-index: 100; max-height: 300px; overflow-y: auto; }
+.dropdown-item { width: 100%; padding: 10px 14px; border: none; background: transparent; cursor: pointer; text-align: left; border-bottom: 1px solid #F3F4F6; display: flex; flex-direction: column; gap: 3px; }
+.dropdown-item.active { background: #EFF6FF; }
+.item-row { display: flex; gap: 8px; align-items: baseline; }
+.item-no { font-size: 11px; color: #9CA3AF; flex-shrink: 0; }
+.item-name { font-size: 12px; font-weight: 600; color: #111827; line-height: 1.4; }
+.dropdown-item.active .item-name { color: #1D4ED8; }
+.item-meta { display: flex; gap: 5px; padding-left: 26px; flex-wrap: wrap; }
+.meta-tag { font-size: 10px; padding: 1px 5px; border-radius: 6px; }
+.meta-aroma { background: #ECFDF5; color: #065F46; }
+.meta-option { background: #FDF4FF; color: #6B21A8; }
+.meta-machine { background: #FFF7ED; color: #92400E; }
+.free-input { width: 100%; padding: 8px 10px; border: 1px solid #D1D5DB; border-radius: 8px; font-size: 13px; color: #111827; background: #fff; margin-top: 8px; font-family: inherit; }
+.free-input:focus { outline: none; border-color: #3B82F6; }
+.intensity-row { display: flex; align-items: center; gap: 10px; }
+.intensity-row input[type=range] { flex: 1; }
+.intensity-label { font-size: 12px; color: #9CA3AF; }
+.intensity-val { font-size: 13px; font-weight: 600; min-width: 90px; color: #374151; text-align: right; }
+.limit-note { font-size: 11px; color: #92400E; margin-top: 5px; }
+.output-box { background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 10px; padding: 12px 14px; font-size: 12px; line-height: 1.9; color: #111827; white-space: pre-wrap; font-family: monospace; min-height: 80px; margin-bottom: 10px; }
+.copy-btn { width: 100%; padding: 12px; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; border: 1px solid #D1D5DB; background: #fff; color: #374151; font-family: inherit; }
+.copy-btn.done { border: 1.5px solid #059669; background: #ECFDF5; color: #065F46; }
+.copy-btn.locked { border-color: #E5E7EB; background: #F9FAFB; color: #9CA3AF; cursor: not-allowed; }
+.reset-btn { width: 100%; padding: 8px; margin-top: 6px; border: 1px solid #E5E7EB; border-radius: 10px; background: transparent; color: #9CA3AF; font-size: 13px; cursor: pointer; font-family: inherit; }
+.relative { position: relative; }
+.hidden { display: none !important; }
+
+/* 同意書セクション */
+.consent-box { background: #fff; border: 1px solid #E5E7EB; border-radius: 12px; padding: 16px; margin-bottom: 20px; }
+.consent-question { font-size: 15px; font-weight: 600; color: #111827; margin-bottom: 14px; }
+.consent-btns { display: flex; gap: 10px; }
+.consent-btn { flex: 1; padding: 12px; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; border: 1.5px solid #E5E7EB; background: #F9FAFB; color: #6B7280; font-family: inherit; transition: all 0.15s; }
+.consent-btn.yes { border-color: #059669; background: #ECFDF5; color: #065F46; }
+.consent-btn.no  { border-color: #DC2626; background: #FEF2F2; color: #991B1B; }
+.consent-warning { margin-top: 12px; padding: 12px 14px; background: #FEF9EC; border: 1px solid #FDE68A; border-radius: 10px; font-size: 13px; color: #92400E; line-height: 1.6; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="header-label">カルテ入力</div>
+  <div class="header-title">施術内容ジェネレーター</div>
+
+  <!-- 同意書確認 -->
+  <div class="consent-box">
+    <div class="consent-question">同意書にサインをもらいましたか？</div>
+    <div class="consent-btns">
+      <button class="consent-btn" id="consent-yes" onclick="setConsent(true)">はい</button>
+      <button class="consent-btn" id="consent-no"  onclick="setConsent(false)">いいえ</button>
+    </div>
+    <div class="consent-warning hidden" id="consent-warning">
+      電子カルテの同意書にサインをもらったら <strong>はい</strong> を押してください。
+    </div>
+  </div>
+
+  <!-- メニュー -->
+  <div class="section">
+    <div class="section-head">メニュー <span id="badge-menu" class="badge badge-required">必須</span></div>
+    <div class="relative">
+      <button class="select-btn locked-btn" id="menu-btn" onclick="tryOpenMenu()">
+        <span id="menu-label">メニューを選択してください</span>
+        <span id="menu-arrow" style="font-size:11px;color:#9CA3AF;margin-top:2px;flex-shrink:0">▼</span>
+      </button>
+      <div class="dropdown hidden" id="menu-dropdown"></div>
+    </div>
+  </div>
+
+  <div id="form-area" class="hidden">
+    <div class="section">
+      <div class="section-head">主訴 <span id="badge-shuso" class="badge badge-required">必須</span></div>
+      <div class="sub-label">部位</div>
+      <div class="chips" id="chips-shuso-parts"></div>
+      <div class="sub-label">症状</div>
+      <div class="chips" id="chips-shuso-symptoms"></div>
+      <input type="text" class="free-input" id="shuso-free" placeholder="その他（自由入力）" oninput="onInput()">
+    </div>
+    <div class="section hidden" id="section-aroma">
+      <div class="section-head">アロマ <span id="badge-aroma" class="badge badge-required">必須</span></div>
+      <div class="sub-label">通常</div>
+      <div class="chips" id="chips-aroma-normal"></div>
+      <div class="sub-label">限定</div>
+      <div class="chips" id="chips-aroma-limited"></div>
+    </div>
+    <div class="section hidden" id="section-option">
+      <div class="section-head">オプション <span id="badge-option" class="badge badge-required">必須</span> <span id="badge-option-count" class="badge badge-info"></span></div>
+      <div class="chips" id="chips-option"></div>
+      <div class="limit-note hidden" id="option-limit"></div>
+    </div>
+    <div class="section hidden" id="section-machine">
+      <div class="section-head">機械部位 <span id="badge-machine" class="badge badge-required">必須</span> <span id="badge-machine-count" class="badge badge-info"></span></div>
+      <div class="chips" id="chips-machine"></div>
+      <div class="limit-note hidden" id="machine-limit"></div>
+    </div>
+    <div class="section">
+      <div class="section-head">圧の強さ <span class="badge badge-done">✓</span></div>
+      <div class="intensity-row">
+        <span class="intensity-label">弱</span>
+        <input type="range" id="intensity" min="1" max="5" value="3" oninput="onInput()">
+        <span class="intensity-label">強</span>
+        <span class="intensity-val" id="intensity-val">普通（3）</span>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-head">NG・注意事項 <span id="badge-ng" class="badge badge-required">必須</span></div>
+      <div class="sub-label">部位</div>
+      <div class="chips" id="chips-ng-parts"></div>
+      <div id="ng-detail-area">
+        <div class="sub-label">理由</div>
+        <div class="chips" id="chips-ng-reasons"></div>
+        <input type="text" class="free-input" id="ng-free" placeholder="その他NG・備考（自由入力）" oninput="onInput()">
+      </div>
+    </div>
+    <div class="section-head" style="margin-top:20px;margin-bottom:8px;">カルテ記載文</div>
+    <div class="output-box" id="output">選択するとここに文章が生成されます</div>
+    <button class="copy-btn locked" id="copy-btn" onclick="doCopy()">未入力の項目があります</button>
+    <button class="reset-btn" onclick="doReset()">リセット</button>
+  </div>
+</div>
+<script>
+const MENUS=[
+  {id:1,name:"【★初回限定★】オーダーメイドアロマ☆リンパマッサージ全身90分",time:"90分",price:"8,700円",aroma:true,options:["頭ツボ","顔ツボ","足ツボ","ラジオ波"],optionCount:1,machine:{parts:["背中","二の腕","腰","太もも","ふくらはぎ","お腹"],count:1,fixed:false,cond:"ラジオ波"}},
+  {id:2,name:"【平日限定】代謝UP☆全身アロマ☆リンパマッサージ60分",time:"60分",price:"6,000円",aroma:true,options:[],optionCount:0,machine:null},
+  {id:3,name:"【カップル・ペアプラン】全身アロマリンパマッサージ70分〔お一人様〕",time:"70分",price:"7,000円",aroma:true,options:["頭ツボ","顔ツボ","足ツボ"],optionCount:2,machine:null},
+  {id:4,name:"【カップル・ペアプラン】全身アロマリンパマッサージ100分（お一人様〕",time:"100分",price:"10,000円",aroma:true,options:["頭ツボ","顔ツボ","足ツボ"],optionCount:2,machine:null},
+  {id:5,name:"【女性ペア割】わがままを叶える女子会プラン☆全身アロマ100分（お一人様）",time:"100分",price:"9,800円",aroma:true,options:[],optionCount:0,machine:null},
+  {id:6,name:"【人気NO1】最強疲労解消☆全身アロマリンパ＆極上ドライヘッドスパ100分",time:"100分",price:"10,300円",aroma:true,options:[],optionCount:0,machine:null},
+  {id:7,name:"【高濃度】炭酸ドライヘッドスパ（頭・デコルテ・顔ツボ・足ツボ）60分",time:"60分",price:"6,900円",aroma:false,options:[],optionCount:0,machine:null},
+  {id:8,name:"【全日】代謝UP◇全身アロマ◇リンパマッサージ60分",time:"60分",price:"6,500円",aroma:true,options:[],optionCount:0,machine:null},
+  {id:9,name:"◆美脚・肩コリ◆最新ラジオ波×吸い上げ×キャビ付全身深リンパ90分",time:"90分",price:"9,800円",aroma:true,options:[],optionCount:0,machine:{parts:["背中","二の腕","腰","太もも","ふくらはぎ","お腹"],count:1,fixed:false,cond:null}},
+  {id:10,name:"【肩こり・眼精疲労】ドライヘッド付全身アロマリンパマッサージ７５分",time:"75分",price:"7,800円",aroma:true,options:[],optionCount:0,machine:null},
+  {id:11,name:"【こり解消】全身アロマリンパ+選べるオプション（頭ツボ/顔ツボ/足ツボ）70分",time:"70分",price:"7,000円",aroma:true,options:["頭ツボ","顔ツボ","足ツボ"],optionCount:1,machine:null},
+  {id:12,name:"【人気☆】全身アロマリンパ+選べるオプション（頭ツボ/顔ツボ/足ツボ）90分",time:"90分",price:"9,000円",aroma:true,options:["頭ツボ","顔ツボ","足ツボ"],optionCount:1,machine:null},
+  {id:13,name:"【贅沢】全身アロマリンパ+選べる2オプション（頭ツボ/顔ツボ/足ツボ）120分",time:"120分",price:"12,000円",aroma:true,options:["頭ツボ","顔ツボ","足ツボ"],optionCount:2,machine:null},
+  {id:14,name:"◆冷え性肩凝り◆最新ラジオ波×吸い上げ×キャビ×EMS4機能あて80分",time:"80分",price:"8,900円",aroma:false,options:[],optionCount:0,machine:{parts:["背中","二の腕","腰","太もも","ふくらはぎ","お腹"],count:2,fixed:false,cond:null}},
+  {id:15,name:"◆強力脂肪燃焼◆最新キャビ・光ラジオ波90分付DETOXリンパ１２０分",time:"120分",price:"15,500円",aroma:true,options:[],optionCount:0,machine:{parts:["上半身","下半身"],count:1,fixed:false,cond:null}},
+  {id:16,name:"首肩コリ解消☆◆アロマリンパ60分+ラジオ波吸引25分+ドライヘッド15分☆100分",time:"100分",price:"11,000円",aroma:true,options:[],optionCount:0,machine:{parts:["背中","首肩"],count:2,fixed:true,cond:null}},
+  {id:17,name:"【セラピストデビュー割】全身アロマリンパマッサージ60分",time:"60分",price:"5,000円",aroma:true,options:[],optionCount:0,machine:null},
+  {id:18,name:"【隙間時間に】アロマリンパ+選べるオプション（頭ツボ/顔ツボ/足ツボ）45分",time:"45分",price:"4,800円",aroma:true,options:["頭ツボ","顔ツボ","足ツボ"],optionCount:1,machine:null},
+  {id:19,name:"◆衝撃スリム体験◆選べる全身パーツ♪最新☆美容機器お試し30分",time:"30分",price:"3,500円",aroma:false,options:[],optionCount:0,machine:{parts:["背中","二の腕","腰","太もも","ふくらはぎ","お腹"],count:1,fixed:false,cond:null}},
+  {id:20,name:"アロマリンパオイルマッサージ 30分 ※初回のみ",time:"45分",price:"3,600円",aroma:true,options:[],optionCount:0,machine:null},
+  {id:21,name:"アロマリンパオイルマッサージ 60分",time:"75分",price:"6,600円",aroma:true,options:[],optionCount:0,machine:null},
+  {id:22,name:"アロマリンパオイルマッサージ 90分",time:"105分",price:"9,900円",aroma:true,options:[],optionCount:0,machine:null},
+  {id:23,name:"アロマリンパオイルマッサージ 120分",time:"135分",price:"13,200円",aroma:true,options:[],optionCount:0,machine:null},
+  {id:24,name:"リフレクソロジー 30分",time:"45分",price:"3,500円",aroma:false,options:[],optionCount:0,machine:null},
+  {id:25,name:"リフレクソロジー 60分",time:"75分",price:"6,600円",aroma:false,options:[],optionCount:0,machine:null},
+  {id:26,name:"ドライヘッドスパ 30分",time:"45分",price:"4,000円",aroma:false,options:[],optionCount:0,machine:null},
+  {id:27,name:"ドライヘッドスパ 45分",time:"60分",price:"5,500円",aroma:false,options:[],optionCount:0,machine:null},
+  {id:28,name:"ドライヘッドスパ 60分",time:"75分",price:"7,000円",aroma:false,options:[],optionCount:0,machine:null},
+];
+const SHUSO_PARTS=["全身","上半身","頭","目","首","肩","デコルテ","脇","腕","肩甲骨","背中","腰","お腹","下半身","お尻","鼠蹊部","太もも","ふくらはぎ"];
+const SHUSO_SYMPTOMS=["凝り","張り","むくみ","疲れ","重い","痛み","冷え","不眠"];
+const AROMA_NORMAL=["通常1","通常2","通常3","通常4","通常5","通常6","通常7","通常8"];
+const AROMA_LIMITED=["限定1","限定2","限定3"];
+const NG_PARTS=["なし","脇腹","足裏","太もも表面","太もも背面","腰","お尻","指","腕","頬","目の周り"];
+const NG_REASONS=["ケガ","苦手"];
+const ILABELS=["","弱め","やや弱め","普通","やや強め","強め"];
+
+let consentOk = false;
+let S={menuId:null,shusoParts:[],shusoSymptoms:[],aroma:null,options:[],machineParts:[],ngParts:[],ngReasons:[],intensity:3};
+
+function setConsent(val) {
+  consentOk = val;
+  const yesBtn = document.getElementById('consent-yes');
+  const noBtn  = document.getElementById('consent-no');
+  const warn   = document.getElementById('consent-warning');
+  const menuBtn = document.getElementById('menu-btn');
+  if (val) {
+    yesBtn.className = 'consent-btn yes';
+    noBtn.className  = 'consent-btn';
+    warn.classList.add('hidden');
+    menuBtn.className = S.menuId ? 'select-btn active' : 'select-btn';
+  } else {
+    yesBtn.className = 'consent-btn';
+    noBtn.className  = 'consent-btn no';
+    warn.classList.remove('hidden');
+    menuBtn.className = 'select-btn locked-btn';
+    // メニューが開いていれば閉じる
+    document.getElementById('menu-dropdown').classList.add('hidden');
+    document.getElementById('menu-arrow').textContent = '▼';
+  }
+}
+
+function tryOpenMenu() {
+  if (!consentOk) return;
+  toggleDropdown();
+}
+
+function getMenu(){return MENUS.find(m=>m.id===S.menuId)||null;}
+function toggleDropdown(){const dd=document.getElementById('menu-dropdown');const open=!dd.classList.contains('hidden');if(open){dd.classList.add('hidden');document.getElementById('menu-arrow').textContent='▼';}else{buildDD();dd.classList.remove('hidden');document.getElementById('menu-arrow').textContent='▲';}}
+function buildDD(){const dd=document.getElementById('menu-dropdown');dd.innerHTML='';MENUS.forEach(m=>{const b=document.createElement('button');b.className='dropdown-item'+(m.id===S.menuId?' active':'');let tags='';if(m.aroma)tags+=`<span class="meta-tag meta-aroma">アロマ</span>`;if(m.optionCount)tags+=`<span class="meta-tag meta-option">OP×${m.optionCount}</span>`;if(m.machine)tags+=`<span class="meta-tag meta-machine">機械</span>`;b.innerHTML=`<div class="item-row"><span class="item-no">No.${m.id}</span><span class="item-name">${m.name}</span></div><div class="item-meta"><span style="font-size:11px;color:#6B7280">${m.time}</span><span style="font-size:11px;color:#6B7280">${m.price}</span>${tags}</div>`;b.onclick=()=>selectMenu(m.id);dd.appendChild(b);});}
+function selectMenu(id){S.menuId=id;S.options=[];S.aroma=null;S.machineParts=[];document.getElementById('menu-dropdown').classList.add('hidden');document.getElementById('menu-arrow').textContent='▼';const m=getMenu();document.getElementById('menu-label').textContent=`No.${m.id}　${m.name}`;document.getElementById('menu-btn').className='select-btn active';document.getElementById('form-area').classList.remove('hidden');buildForm();onInput();}
+function buildForm(){const m=getMenu();buildChipSet('chips-shuso-parts',SHUSO_PARTS,()=>S.shusoParts,l=>{toggle(S.shusoParts,l);onInput();});buildChipSet('chips-shuso-symptoms',SHUSO_SYMPTOMS,()=>S.shusoSymptoms,l=>{toggle(S.shusoSymptoms,l);onInput();});document.getElementById('shuso-free').value='';const sa=document.getElementById('section-aroma');if(m.aroma){sa.classList.remove('hidden');buildChipSet('chips-aroma-normal',AROMA_NORMAL,()=>[S.aroma],l=>{S.aroma=S.aroma===l?null:l;onInput();});buildChipSet('chips-aroma-limited',AROMA_LIMITED,()=>[S.aroma],l=>{S.aroma=S.aroma===l?null:l;onInput();});}else sa.classList.add('hidden');const so=document.getElementById('section-option');if(m.optionCount>0){so.classList.remove('hidden');document.getElementById('badge-option-count').textContent=`${m.optionCount}つ選択`;buildOptionChips();}else so.classList.add('hidden');buildMachineSection();buildChipSet('chips-ng-parts',NG_PARTS,()=>S.ngParts,l=>{if(l==='なし'){S.ngParts=S.ngParts.includes('なし')?[]:['なし'];S.ngReasons=[];}else{S.ngParts=S.ngParts.includes(l)?S.ngParts.filter(x=>x!==l):[...S.ngParts.filter(x=>x!=='なし'),l];}onInput();});buildChipSet('chips-ng-reasons',NG_REASONS,()=>S.ngReasons,l=>{toggle(S.ngReasons,l);onInput();});document.getElementById('ng-free').value='';}
+function toggle(arr,l){const i=arr.indexOf(l);if(i>=0)arr.splice(i,1);else arr.push(l);}
+function buildChipSet(id,items,getSel,onClick){const c=document.getElementById(id);c.innerHTML='';items.forEach(item=>{const b=document.createElement('button');b.className='chip'+(getSel().includes(item)?' selected':'');b.textContent=item;b.onclick=()=>onClick(item);c.appendChild(b);});}
+function buildOptionChips(){const m=getMenu();const c=document.getElementById('chips-option');c.innerHTML='';const maxed=S.options.length>=m.optionCount;m.options.forEach(item=>{const sel=S.options.includes(item);const b=document.createElement('button');b.className='chip'+(sel?' selected':'')+(!sel&&maxed?' disabled':'');b.disabled=!sel&&maxed;b.textContent=item;b.onclick=()=>{if(!sel&&maxed)return;if(sel){S.options=S.options.filter(o=>o!==item);if(m.machine&&m.machine.cond===item)S.machineParts=[];}else S.options.push(item);buildOptionChips();buildMachineSection();onInput();};c.appendChild(b);});const lim=document.getElementById('option-limit');if(maxed){lim.textContent=`✓ ${m.optionCount}つ選択済み`;lim.classList.remove('hidden');}else lim.classList.add('hidden');}
+function buildMachineSection(){const m=getMenu();const sec=document.getElementById('section-machine');if(!m.machine){sec.classList.add('hidden');return;}const show=m.machine.cond?S.options.includes(m.machine.cond):true;if(!show){sec.classList.add('hidden');return;}sec.classList.remove('hidden');const c=document.getElementById('chips-machine');c.innerHTML='';if(m.machine.fixed){document.getElementById('badge-machine-count').textContent='固定';m.machine.parts.forEach(p=>{const s=document.createElement('span');s.className='chip-fixed';s.textContent=p;c.appendChild(s);});}else{document.getElementById('badge-machine-count').textContent=`${m.machine.count}部位選択`;const maxed=S.machineParts.length>=m.machine.count;m.machine.parts.forEach(p=>{const sel=S.machineParts.includes(p);const b=document.createElement('button');b.className='chip'+(sel?' selected':'')+(!sel&&maxed?' disabled':'');b.disabled=!sel&&maxed;b.textContent=p;b.onclick=()=>{if(!sel&&maxed)return;if(sel)S.machineParts=S.machineParts.filter(x=>x!==p);else S.machineParts.push(p);buildMachineSection();onInput();};c.appendChild(b);});const lim=document.getElementById('machine-limit');if(maxed){lim.textContent=`✓ ${m.machine.count}部位選択済み`;lim.classList.remove('hidden');}else lim.classList.add('hidden');}}
+function onInput(){const m=getMenu();if(!m)return;S.intensity=parseInt(document.getElementById('intensity').value);document.getElementById('intensity-val').textContent=`${ILABELS[S.intensity]}（${S.intensity}）`;const sf=document.getElementById('shuso-free').value.trim();const nf=document.getElementById('ng-free').value.trim();const ngN=S.ngParts.includes('なし');document.getElementById('ng-detail-area').style.display=ngN?'none':'';refreshChips('chips-shuso-parts',SHUSO_PARTS,S.shusoParts,null);refreshChips('chips-shuso-symptoms',SHUSO_SYMPTOMS,S.shusoSymptoms,null);if(m.aroma){refreshChips('chips-aroma-normal',AROMA_NORMAL,[S.aroma],null);refreshChips('chips-aroma-limited',AROMA_LIMITED,[S.aroma],null);}refreshChips('chips-ng-parts',NG_PARTS,S.ngParts,p=>p!=='なし'&&ngN);refreshChips('chips-ng-reasons',NG_REASONS,S.ngReasons,null);const shusoOk=S.shusoParts.length>0||S.shusoSymptoms.length>0||sf!=='';const aromaOk=!m.aroma||S.aroma!==null;const optOk=m.optionCount===0||S.options.length>=m.optionCount;const showM=m.machine&&(m.machine.cond?S.options.includes(m.machine.cond):true);const machOk=!showM||m.machine.fixed||S.machineParts.length>=m.machine.count;const ngOk=S.ngParts.length>0||nf!=='';const ok=shusoOk&&aromaOk&&optOk&&machOk&&ngOk;setBadge('badge-menu',true);setBadge('badge-shuso',shusoOk);if(m.aroma)setBadge('badge-aroma',aromaOk);if(m.optionCount>0)setBadge('badge-option',optOk);if(showM&&!m.machine.fixed)setBadge('badge-machine',machOk);setBadge('badge-ng',ngOk);const lines=[];const si=[];if(S.shusoParts.length)si.push(S.shusoParts.join('・'));if(S.shusoSymptoms.length)si.push(S.shusoSymptoms.join('・'));if(sf)si.push(sf);lines.push(`【主訴】${si.length?si.join('／'):'未入力'}`);if(m.aroma)lines.push(`【アロマ】${S.aroma??'未選択'}`);if(m.optionCount>0)lines.push(`【オプション】${S.options.length?S.options.join('、'):'未選択'}（${m.optionCount}つ選択）`);if(showM){if(m.machine.fixed)lines.push(`【機械部位】${m.machine.parts.join('、')}（固定）`);else lines.push(`【機械部位】${S.machineParts.length?S.machineParts.join('、'):'未選択'}（${m.machine.count}部位）`);}lines.push(`【圧】${ILABELS[S.intensity]}（${S.intensity}/5）`);const ni=[];if(ngN){ni.push('なし');}else{if(S.ngParts.length)ni.push(S.ngParts.join('・'));if(S.ngReasons.length)ni.push(S.ngReasons.join('・'));}if(nf)ni.push(nf);lines.push(`【NG・注意】${ni.length?ni.join('／'):'未入力'}`);document.getElementById('output').textContent=lines.join('\n');const btn=document.getElementById('copy-btn');if(ok){btn.className='copy-btn';btn.textContent='カルテにコピー';btn.disabled=false;}else{btn.className='copy-btn locked';btn.textContent='未入力の項目があります';btn.disabled=true;}}
+function refreshChips(id,items,sel,disFn){const c=document.getElementById(id);Array.from(c.children).forEach((b,i)=>{const item=items[i];const s=sel.includes(item);const d=disFn?disFn(item):false;b.className='chip'+(s?' selected':'')+(d?' disabled':'');b.disabled=d;});}
+function setBadge(id,filled){const el=document.getElementById(id);if(!el)return;el.className='badge '+(filled?'badge-done':'badge-required');el.textContent=filled?'✓':'必須';}
+function doCopy(){const t=document.getElementById('output').textContent;if(!t||t==='選択するとここに文章が生成されます')return;navigator.clipboard.writeText(t).then(()=>{const b=document.getElementById('copy-btn');b.className='copy-btn done';b.textContent='✓ コピーしました';setTimeout(()=>{b.className='copy-btn';b.textContent='カルテにコピー';},2000);});}
+function doReset(){
+  consentOk=false;
+  S={menuId:null,shusoParts:[],shusoSymptoms:[],aroma:null,options:[],machineParts:[],ngParts:[],ngReasons:[],intensity:3};
+  document.getElementById('consent-yes').className='consent-btn';
+  document.getElementById('consent-no').className='consent-btn';
+  document.getElementById('consent-warning').classList.add('hidden');
+  document.getElementById('menu-label').textContent='メニューを選択してください';
+  document.getElementById('menu-btn').className='select-btn locked-btn';
+  document.getElementById('form-area').classList.add('hidden');
+  document.getElementById('menu-dropdown').classList.add('hidden');
+  document.getElementById('menu-arrow').textContent='▼';
+  setBadge('badge-menu',false);
+}
+document.addEventListener('click',e=>{const dd=document.getElementById('menu-dropdown');if(!dd.classList.contains('hidden')&&!document.getElementById('menu-btn').contains(e.target)&&!dd.contains(e.target)){dd.classList.add('hidden');document.getElementById('menu-arrow').textContent='▼';}});
+</script>
+</body>
+</html>
